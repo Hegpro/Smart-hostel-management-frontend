@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import DashboardLayout from "@/components/layout/dashboard-layout"
 import StatCard from "@/components/dashboard/stat-card"
 import { UserCheck, AlertCircle, Home } from "lucide-react"
 import RoomGrid from "@/components/dashboard/room-grid"
-import ProtectedRoute from "@/components/auth/protected-route";
+import ProtectedRoute from "@/components/auth/protected-route"
+import { getChiefDashboard } from "@/services/dashboardService"  // <-- added
 
 const menuItems = [
   { icon: <span>📊</span>, label: "Dashboard", href: "/dashboard/chief-warden" },
@@ -18,65 +19,72 @@ const menuItems = [
 
 export default function ChiefWardenDashboard() {
   const router = useRouter()
-  const [students] = useState([
-    { id: "1", name: "John Doe", usn: "USN001", room: "101", status: "Active" },
-    { id: "2", name: "Jane Smith", usn: "USN002", room: "102", status: "Active" },
-    { id: "3", name: "Bob Wilson", usn: "USN003", room: "103", status: "Inactive" },
-  ])
 
-  const [complaints] = useState([
-    { id: "1", student: "John Doe", category: "Room Issue", status: "Pending", date: "2025-11-01" },
-    { id: "2", student: "Jane Smith", category: "Maintenance", status: "In Progress", date: "2025-10-28" },
-  ])
-
+  const [dashboardData, setDashboardData] = useState<any>(null)   // <-- added
+  const [loading, setLoading] = useState(true)                   // <-- added
   const [hostelFilter, setHostelFilter] = useState("All")
 
-  const handleManageRooms = () => {
-    router.push("/dashboard/chief-warden/rooms")
-  }
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getChiefDashboard()
+        console.log("Dashboard Data:", data)
+        setDashboardData(data)
+      } catch (err) {
+        console.error("Dashboard fetch error:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
-  const handleResetData = () => {
-    // Logic to reset data
-  }
+  const handleManageRooms = () => router.push("/dashboard/chief-warden/rooms")
+  const handleResetData = () => {}
+
+  // ⭐ Loading state
+  if (loading) return <div className="p-8 text-center">Loading dashboard...</div>
 
   return (
     <ProtectedRoute allowedRoles={["chiefWarden"]}>
-      <DashboardLayout menuItems={menuItems} role="Chief Warden" userName="Dr. Admin">
+      <DashboardLayout menuItems={menuItems} role="Chief Warden" userName="Dr. Satish">
         <div className="p-6 space-y-8">
           <div>
             <h2 className="text-3xl font-bold text-foreground">Welcome, Chief Warden</h2>
             <p className="text-muted-foreground mt-1">Manage your hostel operations and monitor all activities</p>
           </div>
 
+          {/* ⭐ Stat Cards pulling backend values */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
               icon={<span>👥</span>}
               title="Total Students"
-              value="256"
+              value={dashboardData?.totalStudents}
               subtitle="Active residents"
-              trend={{ value: 12, isPositive: true }}
+              // trend={{ value: 12, isPositive: true }}
             />
             <StatCard
               icon={<UserCheck size={24} />}
               title="Total Wardens"
-              value="8"
+              value={dashboardData?.totalWardens}
               subtitle="All hostel blocks"
-              trend={{ value: 0, isPositive: true }}
+              // trend={{ value: 0, isPositive: true }}
             />
             <StatCard
               icon={<Home size={24} />}
               title="Room Occupancy"
-              value="92%"
+              value={`${dashboardData?.roomStats?.filledPercentage || 0}%`}
               subtitle="Rooms filled"
-              trend={{ value: 5, isPositive: true }}
+              // trend={{ value: 5, isPositive: true }}
             />
           </div>
 
+          {/* ⭐ Recent Students */}
           <div className="grid lg:grid-cols-2 gap-6">
             <div className="bg-card border border-border rounded-lg p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">Recent Students</h3>
               <div className="space-y-3">
-                {students.slice(0, 3).map((student) => (
+                {dashboardData?.recentStudents?.slice(0, 3)?.map((student: any) => (
                   <div
                     key={student.id}
                     className="flex items-center justify-between pb-3 border-b border-border last:border-0"
@@ -103,6 +111,7 @@ export default function ChiefWardenDashboard() {
             </div>
           </div>
 
+          {/* Room Grid Section */}
           <div className="bg-card border border-border rounded-lg p-8 space-y-6">
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-2">Hostel Room Allocation</h3>
@@ -126,21 +135,6 @@ export default function ChiefWardenDashboard() {
               <RoomGrid filter={hostelFilter} />
             </div>
 
-            <div className="flex flex-wrap gap-6 p-4 bg-muted rounded-lg border border-border">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-emerald-500"></div>
-                <span className="text-sm font-medium">Available</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-red-500"></div>
-                <span className="text-sm font-medium">Occupied</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-yellow-400"></div>
-                <span className="text-sm font-medium">Maintenance</span>
-              </div>
-            </div>
-
             <button
               onClick={handleManageRooms}
               className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-semibold transition"
@@ -160,3 +154,4 @@ export default function ChiefWardenDashboard() {
     </ProtectedRoute>
   )
 }
+// Note: The getChiefDashboard function is assumed to be defined in the dashboardService file to fetch data from the backend.
