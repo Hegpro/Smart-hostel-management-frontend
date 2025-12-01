@@ -11,7 +11,7 @@ interface AddStaffModalProps {
   onSuccess?: () => void
 }
 
-const staffCategories = ["maintenance", "security", "cleaning", "management", "other"]
+const staffCategories = ["electrician", "plumber", "cleaner", "roomBoy", "carpenter", "civil"]
 
 // Generate secure random password
 function generatePassword(): string {
@@ -78,29 +78,33 @@ export default function AddStaffModal({ isOpen, onClose, onSuccess }: AddStaffMo
     setIsLoading(true)
 
     try {
-      const response = await fetch("/warden/staff", {
+      const response = await fetch("/api/auth/warden/staff", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,  // ADD TOKEN
+        },
         body: JSON.stringify({
           name,
           email,
-          category,
-          phone_no: phoneNo,
+          phone: phoneNo,
+          staffType: category,       // FIX category → staffType
           password: generatedPassword,
         }),
-      })
+      });
 
-      if (response.status === 200) {
-        setSuccessPassword(generatedPassword)
-        setName("")
-        setEmail("")
-        setCategory("")
-        setPhoneNo("")
-        onSuccess?.()
+
+      if (response.ok) {
+        setSuccessPassword(generatedPassword);
+        setName("");
+        setEmail("");
+        setCategory("");
+        setPhoneNo("");
+        onSuccess?.(); // refresh dashboard
       } else if (response.status === 409) {
-        setError("Email already exists")
+        setError("Email already exists");
       } else {
-        setError("Error adding staff")
+        setError("Error adding staff");
       }
     } catch (err) {
       console.warn("[v0] Backend endpoint missing: /warden/staff")
