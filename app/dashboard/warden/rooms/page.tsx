@@ -11,6 +11,7 @@ const menuItems = [
   { icon: "🏠", label: "Room Management", href: "/dashboard/warden/rooms" },
    { icon: <span>🛠️</span>, label: "Manage Staff", href: "/dashboard/warden/manage-staff" },
   { icon: "⚠️", label: "Raise Complaint", href: "/dashboard/warden/raise-complaint" },
+  { icon: "📢", label: "Upload Notice", href: "/dashboard/warden/upload-notice" },
   { icon: "📋", label: "View Complaints", href: "/dashboard/warden/complaints" },
 ]
 

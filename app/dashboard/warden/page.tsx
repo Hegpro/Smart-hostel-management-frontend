@@ -435,7 +435,7 @@ export default function WardenDashboard() {
               className="w-full mt-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/5 transition font-medium"
               data-testid="view-all-complaints-btn"
             >
-              View All Non-Resolvable Complaints
+              View All Closed Complaints
             </button>
           </div>
 
