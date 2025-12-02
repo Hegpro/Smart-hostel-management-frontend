@@ -26,7 +26,7 @@ export default function AddSurplusPage() {
     expiryPeriod: "AM",
     description: "",
   });
-
+  
   function toISODate(date: string, hour: string, minute: string, period: string) {
     if (!date) return ""; // prevents invalid date error
 

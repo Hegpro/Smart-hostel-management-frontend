@@ -1,57 +1,118 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import DashboardLayout from "@/components/layout/dashboard-layout"
-import DataTable from "@/components/dashboard/data-table"
-import { ArrowLeft, X } from 'lucide-react'
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import DashboardLayout from "@/components/layout/dashboard-layout";
+import DataTable from "@/components/dashboard/data-table";
+import { ArrowLeft, X } from "lucide-react";
+import Link from "next/link";
 
-const menuItems = [
-  { icon: "📊", label: "Dashboard", href: "/dashboard/mess-manager" },
-  { icon: "➕", label: "Add Surplus Food", href: "/dashboard/mess-manager/add-surplus" },
-  { icon: "📦", label: "Manage Distribution", href: "/dashboard/mess-manager/manage" },
-  { icon: "👥", label: "View NGOs", href: "/dashboard/mess-manager/ngos" },
-  { icon: "📈", label: "Reports", href: "/dashboard/mess-manager/reports" },
-]
-
-const distributionData = [
-  {
-    id: "1",
-    item: "Rice",
-    quantity: "5kg",
-    ngo: "Food for All",
-    status: "Distributed",
-    date: "2025-11-01",
-  },
-  {
-    id: "2",
-    item: "Dal",
-    quantity: "2kg",
-    ngo: "Community Kitchen",
-    status: "Distributed",
-    date: "2025-11-02",
-  },
-  {
-    id: "3",
-    item: "Vegetables",
-    quantity: "10kg",
-    ngo: "Food for All",
-    status: "",
-    date: "2025-11-03",
-  },
-]
+const BASE_URL = "http://localhost:5000";
 
 export default function ManageDistributionPage() {
-  const [selectedDistribution, setSelectedDistribution] = useState<(typeof distributionData)[0] | null>(null)
-  const [updatedStatus, setUpdatedStatus] = useState("")
+  const [user, setUser] = useState<any>(null);
+  const [distributions, setDistributions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleStatusUpdate = (id: string, newStatus: string) => {
-    console.log("[v0] Distribution", id, "status updated to", newStatus)
-    setSelectedDistribution(null)
-  }
+  const [selectedDistribution, setSelectedDistribution] = useState<any>(null);
+  const [updatedStatus, setUpdatedStatus] = useState("");
+
+  // Fetch Mess Manager profile
+  const getProfile = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      const data = await res.json();
+      setUser(data.user);
+    } catch (err) {
+      console.error("PROFILE ERROR:", err);
+    }
+  };
+
+  // Fetch all surplus posts (surplus food items)
+  const getDistributionPosts = async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch(`${BASE_URL}/api/surplus/all`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      const data = await res.json();
+
+      const mapped = data.surplus.map((item: any) => ({
+        id: item._id,
+        item: item.item || item.title || "Food Item",
+        quantity: item.quantity || "N/A",
+        ngo: item.claimedBy?.name || "Waiting...",
+        ngoId: item.claimedBy?._id || null,
+        status: item.status, // available / claimed / distributed
+        date: new Date(item.createdAt).toLocaleDateString(),
+        raw: item,
+      }));
+
+      setDistributions(mapped);
+    } catch (err) {
+      console.error("FETCH ERROR:", err);
+      setDistributions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, []);
+
+  useEffect(() => {
+    if (user) getDistributionPosts();
+  }, [user]);
+
+  // Update distribution status
+  const handleStatusUpdate = async () => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/surplus/status/${selectedDistribution.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: updatedStatus }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Update failed");
+        return;
+      }
+
+      await getDistributionPosts();
+      setSelectedDistribution(null);
+      setUpdatedStatus("");
+
+    } catch (err) {
+      console.error("UPDATE ERROR:", err);
+      alert("Something went wrong");
+    }
+  };
+
+  const menuItems = [
+    { icon: "📊", label: "Dashboard", href: "/dashboard/mess-manager" },
+    {
+      icon: "📦",
+      label: "Manage Distribution",
+      href: "/dashboard/mess-manager/manage",
+    },
+    { icon: "👥", label: "View NGOs", href: "/dashboard/mess-manager/ngos" },
+  ];
 
   return (
-    <DashboardLayout menuItems={menuItems} role="Mess Manager" userName="Manager">
+    <DashboardLayout menuItems={menuItems} role="Mess Manager" userName={user?.name || "Manager"}>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/mess-manager" className="p-2 hover:bg-muted rounded-lg transition">
@@ -63,25 +124,37 @@ export default function ManageDistributionPage() {
           </div>
         </div>
 
-        <DataTable
-          columns={[
-            { key: "item", label: "Item", sortable: true },
-            { key: "quantity", label: "Quantity", sortable: false },
-            { key: "ngo", label: "NGO", sortable: true },
-            { key: "status", label: "Status", sortable: true },
-            { key: "date", label: "Date", sortable: true },
-          ]}
-          data={distributionData}
-          actions={(row) => (
-            <button
-              onClick={() => setSelectedDistribution(row as (typeof distributionData)[0])}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition"
-            >
-              Update
-            </button>
-          )}
-        />
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <DataTable
+            columns={[
+              { key: "item", label: "Item", sortable: true },
+              { key: "quantity", label: "Quantity", sortable: false },
+              { key: "ngo", label: "NGO", sortable: true },
+              { key: "status", label: "Status", sortable: true },
+              { key: "date", label: "Date", sortable: true },
+            ]}
+            data={distributions}
+            actions={(row) =>
+              row.status === "available" ? (
+                <button
+                  onClick={() => {
+                    setSelectedDistribution(row);
+                    setUpdatedStatus("distributed");
+                  }}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 transition"
+                >
+                  Update
+                </button>
+              ) : (
+                <span className="text-muted-foreground text-sm">No Actions</span>
+              )
+            }
+          />
+        )}
 
+        {/* Modal */}
         {selectedDistribution && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full">
@@ -108,23 +181,22 @@ export default function ManageDistributionPage() {
                   <p className="text-sm text-muted-foreground">NGO</p>
                   <p className="font-semibold text-foreground">{selectedDistribution.ngo}</p>
                 </div>
+
                 <div>
                   <label className="text-sm text-muted-foreground">Update Status</label>
                   <select
                     value={updatedStatus}
                     onChange={(e) => setUpdatedStatus(e.target.value)}
-                    className="w-full mt-2 px-4 py-2 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="w-full mt-2 px-4 py-2 bg-input border border-border rounded-lg text-foreground"
                   >
-                    <option value="">Select Status</option>
-                    
-                    <option value="Distributed">Distributed</option>
+                    <option value="distributed">Distributed</option>
                   </select>
                 </div>
               </div>
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => handleStatusUpdate(selectedDistribution.id, updatedStatus)}
+                  onClick={handleStatusUpdate}
                   className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition font-medium"
                 >
                   Update
@@ -141,5 +213,5 @@ export default function ManageDistributionPage() {
         )}
       </div>
     </DashboardLayout>
-  )
+  );
 }
