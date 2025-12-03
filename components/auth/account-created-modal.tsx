@@ -6,6 +6,7 @@ import { X, Copy, Check } from "lucide-react"
 interface AccountCreatedModalProps {
   isOpen: boolean
   title: string
+  username: string;
   password: string
   isStub: boolean
   onClose: () => void
