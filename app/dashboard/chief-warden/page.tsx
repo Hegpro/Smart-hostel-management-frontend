@@ -8,7 +8,7 @@ import ProtectedRoute from "@/components/auth/protected-route";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE =process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 const HOSTEL_ID = "691e076ba2c5be3ba18a963d"; // change if needed
 
 export default function ChiefWardenDashboard() {
@@ -31,7 +31,7 @@ export default function ChiefWardenDashboard() {
 
     const fetchRooms = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/rooms/hostel/${HOSTEL_ID}`, {
+        const res = await fetch(`${API_BASE}/rooms/hostel/${HOSTEL_ID}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
 
@@ -60,7 +60,7 @@ export default function ChiefWardenDashboard() {
 
     const fetchNotices = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/notices/`, {
+        const res = await fetch(`${API_BASE}/notices/`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
 
@@ -100,7 +100,7 @@ export default function ChiefWardenDashboard() {
   // refresh rooms helper
   const refreshRooms = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/rooms/hostel/${HOSTEL_ID}`, {
+      const res = await fetch(`${API_BASE}/rooms/hostel/${HOSTEL_ID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -131,7 +131,7 @@ export default function ChiefWardenDashboard() {
 
     try {
       const roomId = room._id || room.id;
-      const res = await fetch(`${API_BASE}/api/auth/students/room/${roomId}`, {
+      const res = await fetch(`${API_BASE}/auth/students/room/${roomId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -165,7 +165,7 @@ export default function ChiefWardenDashboard() {
 
     setDeletingStudentId(studentId);
     try {
-      const res = await fetch(`${API_BASE}/api/auth/remove/${studentId}`, {
+      const res = await fetch(`${API_BASE}/auth/remove/${studentId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -215,7 +215,7 @@ export default function ChiefWardenDashboard() {
     if (!confirm("This will reset the academic year for the hostel. Proceed?")) return;
     setResetting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/academic-year`, {
+      const res = await fetch(`${API_BASE}/academic-year`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
@@ -230,7 +230,7 @@ export default function ChiefWardenDashboard() {
         alert("Academic year reset successfully");
         await refreshRooms();
         // refresh notices too
-        const nRes = await fetch(`${API_BASE}/api/notices/`, {
+        const nRes = await fetch(`${API_BASE}/notices/`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const nText = await nRes.text();
