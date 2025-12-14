@@ -8,7 +8,7 @@ import ProtectedRoute from "@/components/auth/protected-route";
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 
-const API_BASE =process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 const HOSTEL_ID = "691e076ba2c5be3ba18a963d"; // change if needed
 
 export default function ChiefWardenDashboard() {
@@ -370,6 +370,31 @@ export default function ChiefWardenDashboard() {
                 <span className="text-sm text-muted-foreground">Maintenance</span>
               </div>
             </div>
+            {/* 🔥 ADDED: INFINITE IMAGE MARQUEE (ONLY NEW PART) */}
+            <div className="mt-8 overflow-hidden">
+              <div className="flex gap-6 animate-marquee whitespace-nowrap">
+                {[
+                  "/images/room.jpeg",
+                  "/images/room2.jpeg",
+                  "/images/room3.jpeg",
+                  "/images/room.jpeg",
+                  "/images/room2.jpeg",
+                  "/images/room3.jpeg",
+                ].map((src, i) => (
+                  <div
+                    key={i}
+                    className="min-w-[300px] h-44 rounded-lg overflow-hidden border shadow"
+                  >
+                    <img
+                      src={src}
+                      alt="Shalmala Hostel Room"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* 🔥 END MARQUEE */}
           </div>
 
           {/* Notices box */}
