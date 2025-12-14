@@ -6,7 +6,7 @@ import DataTable from "@/components/dashboard/data-table";
 import { ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL||"http://localhost:5000/api";
 
 export default function ManageDistributionPage() {
   const [user, setUser] = useState<any>(null);
@@ -19,7 +19,7 @@ export default function ManageDistributionPage() {
   // Fetch Mess Manager profile
   const getProfile = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/me`, {
+      const res = await fetch(`${BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -35,7 +35,7 @@ export default function ManageDistributionPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(`${BASE_URL}/api/surplus/all`, {
+      const res = await fetch(`${BASE_URL}/surplus/all`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -73,7 +73,7 @@ export default function ManageDistributionPage() {
   const handleStatusUpdate = async () => {
     try {
       const res = await fetch(
-        `${BASE_URL}/api/surplus/status/${selectedDistribution.id}`,
+        `${BASE_URL}/surplus/status/${selectedDistribution.id}`,
         {
           method: "PUT",
           headers: {

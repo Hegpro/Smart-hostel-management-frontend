@@ -6,7 +6,7 @@ import DataTable from "@/components/dashboard/data-table";
 import { ArrowLeft, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL||"http://localhost:5000/api";
 
 const menuItems = [
   { icon: "📊", label: "Dashboard", href: "/dashboard/mess-manager" },
@@ -21,7 +21,7 @@ export default function NgosPage() {
 
   const getNgos = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/surplus/ngos/all`, {
+      const res = await fetch(`${BASE_URL}/surplus/ngos/all`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -40,7 +40,7 @@ export default function NgosPage() {
     if (!confirm("Are you sure you want to delete this NGO?")) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/api/surplus/ngos/${ngoId}`, {
+      const res = await fetch(`${BASE_URL}/surplus/ngos/${ngoId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
