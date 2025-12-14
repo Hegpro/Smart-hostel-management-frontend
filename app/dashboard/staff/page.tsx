@@ -6,7 +6,7 @@ import DataTable from "@/components/dashboard/data-table";
 import { ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL||"http://localhost:5000/api";
 
 export default function StaffDashboard() {
   const [user, setUser] = useState<any>(null);
@@ -21,7 +21,7 @@ export default function StaffDashboard() {
   // 1️⃣ Get logged-in user
   const getProfile = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/me`, {
+      const res = await fetch(`${BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -44,7 +44,7 @@ export default function StaffDashboard() {
 
       setLoading(true);
       const res = await fetch(
-        `${BASE_URL}/api/complaints/staff?hostelId=${user.hostelId}`,
+        `${BASE_URL}/complaints/staff?hostelId=${user.hostelId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -112,7 +112,7 @@ export default function StaffDashboard() {
       }
 
       const res = await fetch(
-        `${BASE_URL}/api/complaints/update/${selectedComplaint.id}`,
+        `${BASE_URL}/complaints/update/${selectedComplaint.id}`,
         {
           method: "PUT",
           headers: {
