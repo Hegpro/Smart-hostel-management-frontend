@@ -6,7 +6,7 @@ import DataTable from "@/components/dashboard/data-table";
 import { ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL||"http://localhost:5000/api";
 
 export default function PickupsPage() {
   const [pickups, setPickups] = useState<any[]>([]);
@@ -16,7 +16,7 @@ export default function PickupsPage() {
   // Fetch claimed surplus for NGO
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/surplus/claimed`, {
+      const res = await fetch(`${BASE_URL}/surplus/claimed`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

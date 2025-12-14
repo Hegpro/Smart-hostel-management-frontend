@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/layout/dashboard-layout";
 import { ArrowLeft, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL||"http://localhost:5000/api";
 
 const menuItems = [
   { icon: "📊", label: "Dashboard", href: "/dashboard/ngo" },
@@ -19,7 +19,7 @@ export default function FoodPage() {
   // Fetch all available surplus items
   const getFood = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/surplus/available`, {
+      const res = await fetch(`${BASE_URL}/surplus/available`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
 
@@ -48,7 +48,7 @@ export default function FoodPage() {
   // Claim button handler
   const claimFood = async (id: string) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/surplus/claim/${id}`, {
+      const res = await fetch(`${BASE_URL}/surplus/claim/${id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
