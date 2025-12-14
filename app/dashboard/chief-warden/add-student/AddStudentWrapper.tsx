@@ -36,6 +36,9 @@ export default function AddStudentPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+
   // Handle input change
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -53,9 +56,9 @@ export default function AddStudentPage() {
     setErrors({});
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/chief/student", {
+      const res = await fetch(`${BASE_URL}/auth/chief/student`,  {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -104,7 +107,7 @@ export default function AddStudentPage() {
   return (
     <DashboardLayout menuItems={menuItems} role="Chief Warden" userName="Dr. Admin">
       <div className="p-6 space-y-6">
-        
+
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link href="/dashboard/chief-warden" className="p-2 hover:bg-muted rounded-lg transition">
