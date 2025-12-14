@@ -337,7 +337,7 @@ export default function ChiefWardenDashboard() {
 
                         <div className="ml-3 shrink-0">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${isFull ? "bg-red-100 text-red-800" : isMaintenance ? "bg-gray-100 text-gray-800" : isPartial ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}`}>
-                            {isFull ? "Full" : isMaintenance ? "Maintenance" : isPartial ? "Partial" : "Available"}
+                            {isFull ? "F" : isMaintenance ? "M" : isPartial ? "P" : "A"}
                           </span>
                         </div>
                       </div>
