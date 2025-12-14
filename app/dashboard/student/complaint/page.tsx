@@ -8,7 +8,7 @@ import Link from "next/link";
 import ImageUpload from "@/components/dashboard/image-upload";
 import ProtectedRoute from "@/components/auth/protected-route";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const menuItems = [
   { icon: <span>📊</span>, label: "Dashboard", href: "/dashboard/student" },
@@ -58,7 +58,7 @@ export default function ComplaintPage() {
         body.append("image", formData.image);
       }
 
-      const res = await fetch(`${BASE_URL}/api/complaints/create`, {
+      const res = await fetch(`${BASE_URL}/complaints/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ProtectedRoute from "@/components/auth/protected-route";
 
-const API = "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const menuItems = [
   { icon: "📊", label: "Dashboard", href: "/dashboard/student" },
@@ -23,7 +23,7 @@ export default function ComplaintsPage() {
   useEffect(() => {
     async function fetchComplaints() {
       try {
-        const res = await fetch(`${API}/api/dashboard/student`, {
+        const res = await fetch(`${API}/dashboard/student`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -47,7 +47,7 @@ export default function ComplaintsPage() {
     if (!confirm("Are you sure you want to delete this complaint?")) return;
 
     try {
-      const res = await fetch(`${API}/api/complaints/delete/${id}`, {
+      const res = await fetch(`${API}/complaints/delete/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

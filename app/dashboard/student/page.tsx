@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/layout/dashboard-layout";
 import ProtectedRoute from "@/components/auth/protected-route";
 import { Users, MapPin } from "lucide-react";
 
-const API = "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function StudentDashboard() {
   const [data, setData] = useState<any>(null);
@@ -13,7 +13,7 @@ export default function StudentDashboard() {
 
   const getDashboardData = async () => {
     try {
-      const res = await fetch(`${API}/api/dashboard/student`, {
+      const res = await fetch(`${API}/dashboard/student`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
